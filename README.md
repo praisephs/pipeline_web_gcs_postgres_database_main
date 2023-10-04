@@ -3,14 +3,13 @@
 
 
 ## Overview
-• An Extract, Transform and Load pipeline that gets NYC Green taxi data from DataTalks GitHub Repo,
-loads it into GCS Bucket and transfer the data from the GCS Bucket to a Postgres Database Table.
+• We have an Extract, Transform, and Load (ETL) pipeline designed to retrieve New York City Green taxi data from the DataTalks GitHub Repository. This data is then loaded into a Google Cloud Storage (GCS) Bucket before being transferred to a specific table within a PostgreSQL database.
 
-• It is scheduled to run monthly and will get the corresponding months data.
+• The pipeline is scheduled to run on a monthly basis, fetching data for the respective month.
 
-• Built using the GCS Hook and a custom Postgres connection.
+• We've constructed this pipeline using the GCS Hook in combination with a custom PostgreSQL connection.
 
-• The data pipeline is built in a Docker container and executed with Celery executor so it gives room for scalability.
+• To enhance scalability, we've encapsulated the data pipeline within a Docker container and execute it using the Celery executor. This approach allows us to easily scale up our operations as needed.
 
 ## Setup (official)
 
@@ -82,10 +81,10 @@ docker network ls
 12. Check for postgres db access from the airflow container.
 
 ### SetUp GCP for Local System (Local Environment Oauth-authentication)
-1. Create GCP PROJECT
-2. Create service account: Add Editor and storage admin, storage object admins and bigquery admin
-3. Create credential keys and download it
-4. Change name and location
+1. Establish a Google Cloud Platform (GCP) PROJECT.
+2. Generate a service account with permissions: Include roles such as Editor, Storage Admin, Storage Object Admin, and BigQuery Admin.
+3. Generate credential keys for the service account and save them for future use.
+4. Modify the name and location as required.
 ```bash
 cd ~ && mkdir -p ~/.google/credentials/
 
@@ -169,30 +168,30 @@ password : airflow
 
 # Possible Improvement: Efficient Data Loading to PostgreSQL
 ### Current Approach and Limitations
-The current data loading process in our Apache Airflow DAG relies on Pandas and SQLAlchemy, which are versatile tools for data manipulation and database interaction. However, there are some limitations to this approach:
+Our current data loading process within the Apache Airflow DAG is dependent on Pandas and SQLAlchemy, both of which are powerful tools for data manipulation and database interactions. Nevertheless, there are certain drawbacks associated with this approach:
 
-- Performance: Loading large datasets using Pandas and SQLAlchemy can be slow, especially when dealing with millions of records. It can lead to high memory usage and extended processing times.
+Performance: When dealing with substantial datasets, utilizing Pandas and SQLAlchemy can result in sluggish data loading processes. This is especially noticeable when dealing with millions of records, as it can lead to excessive memory consumption and prolonged processing durations.
 
-- Flexibility: The current approach may not be flexible enough for all scenarios. Specifically, when using the copy_expert method, it may not auto-detect the schema of the data, which can lead to additional manual configuration steps.
+Flexibility: The existing approach may lack the flexibility required for certain scenarios. Particularly, when utilizing the copy_expert method, it may not automatically identify the data schema, necessitating additional manual configuration steps.
 
-- Jinja Templating: In some cases, using Jinja templating for dynamic file names with Pandas may not work as expected, which can hinder automation and dynamic file handling.
+Jinja Templating: There are instances where employing Jinja templating for generating dynamic file names in conjunction with Pandas may not yield the expected results. This can pose challenges for automation and dynamic file handling.
 
 ### Proposed Solution
-To address these limitations and improve the data loading process, we recommend leveraging the capabilities of the PostgreSQL Hook and Operator provided by Apache Airflow. Here's how it can help:
+To overcome these limitations and enhance the data loading process, we recommend harnessing the capabilities of Apache Airflow's PostgreSQL Hook and Operator. Here's how they can be advantageous:
 
-- Performance: The PostgreSQL Hook and Operator offer efficient methods for data loading directly into PostgreSQL, which can significantly improve performance, especially for large datasets. The copy_expert method, in particular, is optimized for high-speed data loading.
+Enhanced Performance: The PostgreSQL Hook and Operator provide efficient methods for directly loading data into PostgreSQL. This can lead to substantial performance improvements, especially when handling large datasets. The copy_expert method, in particular, is optimized for high-speed data loading.
 
-- Schema Detection: The PostgreSQL Hook and Operator can automatically detect the schema of the data being loaded, reducing the need for manual configuration. This streamlines the data loading process.
+Automated Schema Detection: The PostgreSQL Hook and Operator can automatically identify the schema of the data being loaded, reducing the necessity for manual setup. This simplifies and streamlines the data loading procedure.
 
-- Jinja Templating: With the PostgreSQL Operator, you can easily incorporate Jinja templating for dynamic file names and other parameters. This ensures greater flexibility and automation in your workflow.
+Jinja Templating Compatibility: With the PostgreSQL Operator, you can seamlessly incorporate Jinja templating for dynamic file names and other parameters. This ensures greater flexibility and automation within your workflow.
 
 ### Implementation Considerations
-When implementing the PostgreSQL Hook and Operator for data loading, consider the following steps:
+When integrating the PostgreSQL Hook and Operator into your data loading process, keep the following steps in mind:
 
-- Utilize the PostgresHook and PostgresOperator classes in your DAG.
+Incorporate the PostgresHook and PostgresOperator classes into your DAG for seamless operation.
 
-- Take advantage of the copy_expert method for efficient data loading. It is especially useful when dealing with large datasets.
+Harness the power of the copy_expert method for streamlined data loading, particularly beneficial when dealing with extensive datasets.
 
-- Leverage Jinja templating within the PostgresOperator to dynamically specify file names and other parameters as needed.
+Employ Jinja templating within the PostgresOperator to dynamically configure file names and other parameters, enhancing flexibility.
 
-- By transitioning to this improved approach, we can enhance the efficiency and flexibility of our data loading process, ensuring smoother and faster data ingestion into PostgreSQL.
+By embracing this enhanced approach, we can elevate the efficiency and adaptability of our data loading process, guaranteeing smoother and more expedient data ingestion into PostgreSQL.
